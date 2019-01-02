@@ -36,6 +36,20 @@ type User struct {
 	Password  string `json:"Password"`
 }
 
+// Bank structure. Structure tags are used by encoding/json library
+type Bank struct {
+	Objectype   string `json:"doctype"`
+	ID          string `json:"Id"`
+	Loginid     string `json:"Loginid"`
+	Profilename string `json:"Profilename"`
+	Accountype  string `json:"Accountype"`
+	Bankname    string `json:"Bankname"`
+	Routing     string `json:"Routing"`
+	Account     string `json:"Account"`
+	Validated   string `json:"Validated"`
+	Sharedlogin string `json:"Sharedlogin"`
+}
+
 /*Init Function bypassed
 Init.. method is called when the Smart Contract "fabcar" is instantiated by the blockchain network
 Best practice is to have any Ledger initialization in separate function -- see initLedger()
@@ -104,25 +118,52 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 	function, args := APIstub.GetFunctionAndParameters()
 	// Route to the appropriate handler function to interact with the ledger appropriately
 	if function == "queryUser" {
+		fmt.Println("Calling queryUser from main invoke")
 		return s.queryUser(APIstub, args)
 	} else if function == "createUser" {
 		fmt.Println("calling createUser from main invoke")
 		return createUser(APIstub, args)
-	} /*else if function == "changeCarOwner" {
-		return s.changeCarOwner(APIstub, args)
-	} */
+	} else if function == "createBank" {
+		fmt.Println("Calling createBank from main invoke")
+		return s.createBank(APIstub, args)
+	} else if function == "queryBank" {
+		fmt.Println("Calling query bank from main invoke")
+		return s.queryBank(APIstub, args)
+	}
 
 	return shim.Error("Invalid Smart Contract function name.")
 }
 
 func (s *SmartContract) queryUser(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
-
+	fmt.Println("inside smart contract with user id for user", args[0])
+	fmt.Println("inside smart contract var count for user", len(args))
 	if len(args) != 1 {
 		return shim.Error("Incorrect number of arguments. Expecting 1")
 	}
-
-	userAsBytes, _ := APIstub.GetState(args[0])
+	var user User
+	user.Loginid = args[0]
+	key := "U" + args[0]
+	fmt.Println("value of user.LoginID and key is", user.Loginid, key)
+	//userAsBytes, _ := APIstub.GetState(args[0])
+	userAsBytes, _ := APIstub.GetState(key)
+	fmt.Println("inside smart contract user bytes are", userAsBytes)
 	return shim.Success(userAsBytes)
+}
+
+func (s *SmartContract) queryBank(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+	fmt.Println("inside smart contract with user id for Bank ", args[0])
+	fmt.Println("inside smart contract var count for bank", len(args))
+	if len(args) != 1 {
+		return shim.Error("Incorrect number of arguments. Expecting 1")
+	}
+	var bank Bank
+	bank.Loginid = args[0]
+	key := "B" + args[0]
+	fmt.Println("value of bank.LoginID and key is", bank.Loginid, key)
+	//bankAsBytes, _ := APIstub.GetState(args[0])
+	bankAsBytes, _ := APIstub.GetState(key)
+	fmt.Println("inside smart contract bank bytes are", bankAsBytes)
+	return shim.Success(bankAsBytes)
 }
 
 func createUser(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
@@ -158,7 +199,10 @@ func createUser(APIstub shim.ChaincodeStubInterface, args []string) sc.Response 
 	*/
 	userAsBytes, _ := json.Marshal(user)
 	fmt.Println("user bytes are", userAsBytes)
-	err = APIstub.PutState(args[0], userAsBytes)
+	key := "U" + args[12]
+	fmt.Println("User key is", key)
+	err = APIstub.PutState(key, userAsBytes)
+	//err = APIstub.PutState(args[12], userAsBytes)
 	if err != nil {
 		fmt.Println("Could not store user")
 		return shim.Error(err.Error())
@@ -168,25 +212,39 @@ func createUser(APIstub shim.ChaincodeStubInterface, args []string) sc.Response 
 
 }
 
-/* Come back to it Mahender for bank info logic
-func (s *SmartContract) changeCarOwner(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
-
-	if len(args) != 2 {
-		return shim.Error("Incorrect number of arguments. Expecting 2")
+func (s *SmartContract) createBank(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+	var err error
+	fmt.Println("starting createBank")
+	fmt.Println("Number of bank arguments", len(args))
+	if len(args) != 9 {
+		return shim.Error("Incorrect number of arguments for bank. Expecting 9")
 	}
-
-	userAsBytes, _ := APIstub.GetState(args[0])
-	car := User{}
-
-	json.Unmarshal(userAsBytes, &user)
-	car.Owner = args[1]
-
-	userAsBytes, _ = json.Marshal(user)
-	APIstub.PutState(args[0], userAsBytes)
-
+	var bank Bank
+	bank.Objectype = "mypro_bank"
+	bank.ID = args[0]
+	bank.Loginid = args[1]
+	bank.Profilename = args[2]
+	bank.Accountype = args[3]
+	bank.Bankname = args[4]
+	bank.Routing = args[5]
+	bank.Account = args[6]
+	bank.Validated = args[7]
+	bank.Sharedlogin = args[8]
+	fmt.Println("Bank is", bank)
+	bankAsBytes, _ := json.Marshal(bank)
+	fmt.Println("bank bytes are", bankAsBytes)
+	key := "B" + args[1]
+	fmt.Println("key for bank is", key)
+	err = APIstub.PutState(key, bankAsBytes)
+	//err = APIstub.PutState(args[1], bankAsBytes)
+	if err != nil {
+		fmt.Println("Could not store bank")
+		return shim.Error(err.Error())
+	}
+	fmt.Println("- end createBank mypro")
 	return shim.Success(nil)
 }
-*/
+
 // The main function is only relevant in unit test mode. Only included here for completeness.
 func main() {
 

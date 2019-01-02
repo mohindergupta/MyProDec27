@@ -64,7 +64,18 @@ Fabric_Client.newDefaultKeyValueStore({ path: store_path
 	// createCar chaincode function - requires 5 args, ex: args: ['CAR12', 'Honda', 'Accord', 'Black', 'Tom'],
 	// changeCarOwner chaincode function - requires 2 args , ex: args: ['CAR10', 'Dave'],
 	// must send the proposal to endorsing peers
-	var request = {
+	if (tdata.objectype == 'mypro_bank') {
+		var request = {
+			//targets: let default to the peer assigned to the client
+			chaincodeId: 'myprocontract',
+			fcn: 'createBank',
+			args: [tx_id._transaction_id,tdata.loginid,tdata.bank_profile_name,tdata.account_type,tdata.bank_name,tdata.routing_num,tdata.account_num,tdata.verification_result,tdata.shared_with_login],
+			//args: [''],
+			chainId: 'mypro',
+			txId: tx_id
+			}
+	} else {
+		var request = {
 		//targets: let default to the peer assigned to the client
 		chaincodeId: 'myprocontract',
 		fcn: 'createUser',
@@ -72,6 +83,7 @@ Fabric_Client.newDefaultKeyValueStore({ path: store_path
 		//args: [''],
 		chainId: 'mypro',
 		txId: tx_id
+		}
 	};
 
 	// send the transaction proposal to the peers

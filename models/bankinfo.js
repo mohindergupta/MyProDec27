@@ -3,13 +3,14 @@ var Schema = mongoose.Schema;
 
 var BankSchema = new Schema(
     {
-      user: {type: Schema.Types.ObjectId, ref: 'User', required: true},
-      bank_profile_name: {type: String, required: true, max: 100},
-      bank_name: {type: String, required: true, max: 100},
-      account_type: {type: String, required: true, max: 30, enum: ['Checking','Saving','Money Market']},
-      account_num: {type: number, required: true,max: 12},
-      routing_num: {type: number, required: true,max: 12},
-      verification_date: {type: Date, required: false},
+      objectype: {type: String, required: false, max: 100},
+      bankid: Schema.Types.ObjectId,
+      loginid: {type: String, required: false, max: 100},
+      bank_profile_name: {type: String, required: false, max: 100},
+      account_type: {type: String, required: false, max: 30, enum: ['','Checking','Saving','Money Market']},
+      bank_name: {type: String, required: false, max: 100},
+      routing_num: {type: String, required: false,max: 12},
+      account_num: {type: String, required: false,max: 12},
       verification_result: {type: String, required: false, max: 100},
       shared_with_login: {type: String, required: false, max: 100}
     }
